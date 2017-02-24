@@ -1,0 +1,79 @@
+'********************************************************************
+	'MAX7219 LED DISPLAY DRIVER IC DEMO
+	'See how our SSI. object speeds things up...!
+'********************************************************************
+
+include "global.tbh"
+
+'--------------------------------------------------------------------
+#define USE_SSI 1 '0 for "manual" bit-blasting, 1 to enabled SSI object
+'In our tests, "manual" bit blasting took 3.5ms for each 16-bit word,
+'SSI object competed the same in 12.7us -- that's 275 times faster!
+
+'--------------------------------------------------------------------
+const MAX_DIN=PL_IO_NUM_48	'<--- edit this to match your hardware
+const MAX_CLK=PL_IO_NUM_47	'<--- edit this to match your hardware
+const MAX_LOAD=PL_IO_NUM_46	'<--- edit this to match your hardware
+
+'--------------------------------------------------------------------
+declare sub disp_write(byref data as word)
+
+'====================================================================
+sub on_sys_init
+
+#if USE_SSI
+	ssi.channel=0
+	ssi.baudrate=1
+	ssi.clkmap=MAX_CLK
+	ssi.domap=MAX_DIN
+	ssi.direction=PL_SSI_DIRECTION_LEFT
+	ssi.mode=PL_SSI_MODE_3
+	ssi.enabled=YES
+#endif
+
+	io.num=MAX_DIN
+	io.enabled=YES
+	io.num=MAX_CLK
+	io.enabled=YES
+	io.num=MAX_LOAD
+	io.enabled=YES
+
+	disp_write(&hFC01)			'out of shutdown
+	disp_write(&hFAFF)			'max intensity
+	disp_write(&hFBFF)			'Set scan limit to display all
+	disp_write(&hF9FF)			'enable decoding
+	disp_write(&hF801)			'Digit1
+	disp_write(&hF702)			'Digit2
+	disp_write(&hF603)			'Digit3
+	disp_write(&hF504)			'Digit4
+	disp_write(&hF405)			'Digit5
+	disp_write(&hF306)			'Digit6
+	disp_write(&hF207)			'Digit7
+	disp_write(&hF108)			'Digit8
+end sub
+
+'====================================================================
+sub disp_write(byref data as word)
+	
+#if USE_SSI
+	io.lineset(MAX_LOAD,LOW)
+	ssi.value(data,16)
+	io.lineset(MAX_LOAD,HIGH)
+#else
+	dim f as byte
+	
+	io.lineset(MAX_LOAD,LOW)
+	for f=1 to 16
+		io.lineset(MAX_CLK,LOW)
+		if (data and &h8000) then
+			io.lineset(MAX_DIN,HIGH)
+		else 
+			io.lineset(MAX_DIN,LOW)
+		end if
+		data=data*2
+		io.lineset(MAX_CLK,HIGH)
+	next f
+	io.lineset(MAX_LOAD,HIGH)
+	exit sub
+#endif
+end sub
