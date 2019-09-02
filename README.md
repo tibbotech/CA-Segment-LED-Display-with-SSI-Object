@@ -1,5 +1,17 @@
-# CA-Segment-LED-Display-with-SSI-Object
+# Segment LED Display with SSI Object
 
-To download the most recent project without installing GIT, please press the green "Clone or Download" button and select "Download ZIP".
+This application shows how to use the [SSI object](http://blog.tibbo.com/post/274501425/ssi-object-is-ready) to communicate with a [MAX7219](http://datasheets.maxim-ic.com/en/ds/MAX7219-MAX7221.pdf) IC driving an 8-digit LED display.
 
-For more detail about this project, please visit <a href="http://tibbo.com/programmable/applications/external/segment_lcd.html" target="_blank">Project Description Page</a>
+The line mapping is as follows:
+
+- Load: GPIO 46
+- Clock: GPIO 47
+- Din: GPIO 48
+
+**Important note:** To use this application, you must read the MAX7219 [manual](http://datasheets.maxim-ic.com/en/ds/MAX7219-MAX7221.pdf). It may not work otherwise, as the display has several modes of operation.
+
+## What It Looks Like
+
+This is what the project looked like on our bench:
+
+![](READMEImages/max7219.jpg)
